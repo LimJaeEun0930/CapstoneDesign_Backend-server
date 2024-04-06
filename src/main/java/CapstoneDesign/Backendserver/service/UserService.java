@@ -7,7 +7,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -22,7 +21,7 @@ public class UserService {
     @Transactional(readOnly = true)
     public boolean validateDuplicateMember(String id) {
         log.info("중복체크함수실행 id={}",id);
-        Optional<User> existinguser = Optional.ofNullable(userRepository.findOne(id));
+        Optional<User> existinguser = Optional.ofNullable(userRepository.findById(id));
         return existinguser.isPresent();
         }
 

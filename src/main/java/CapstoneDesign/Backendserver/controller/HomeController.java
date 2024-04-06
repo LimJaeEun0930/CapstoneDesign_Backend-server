@@ -1,6 +1,7 @@
 package CapstoneDesign.Backendserver.controller;
 
 import CapstoneDesign.Backendserver.domain.User;
+import CapstoneDesign.Backendserver.service.MailService;
 import CapstoneDesign.Backendserver.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -20,7 +21,8 @@ import org.springframework.web.bind.annotation.*;
 public class HomeController {
 
 
-     private final UserService userService;
+    private final UserService userService;
+    private final MailService mailService;
 
     @GetMapping
     public String mainPage(Model model) {
@@ -57,4 +59,11 @@ public class HomeController {
         } else return new ResponseEntity<>("ok", HttpStatus.OK);
     }
 
+    @GetMapping("register/emailAuthorization")
+    @ResponseBody
+    public HttpStatus register_emailAuthorization(@RequestParam String email) {
+        log.info("이메일 인증 실행...{}", email);
+        mailService.mailAuthorization(email);
+        return HttpStatus.OK;
+    }
 }

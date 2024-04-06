@@ -22,6 +22,7 @@
       <div>
           <label for="email">이메일</label>
           <input type="email" id="email" th:field="*{email}">
+          <button type="button" onclick="emailAuthorization()">이메일 인증번호 발송</button>
       </div>
       <div>
           <label for="name">이름</label>
@@ -71,7 +72,16 @@
             alert("메시지 중복입니다.");
              submitCheck = false;
         });
+    }
 
+    function emailAuthorization() {
+        let email = document.getElementById('email').value;
+        $.ajax({
+            type: "get",
+            url: "/register/emailAuthorization?email=" + email
+        }).done((res)=>{
+            alert("이메일이 보내졌습니다. 확인해주세요");
+        }).fail();
     }
 </script>
 </html>
