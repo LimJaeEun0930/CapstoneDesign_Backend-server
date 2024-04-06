@@ -1,16 +1,19 @@
 <!DOCTYPE html>
 <html xmlns:th="http://thymeleaf.org">
+<script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
+
 <head>
     <meta charset="UTF-8">
     <title>registerPage</title>
 </head>
 <body>
-  <form action="/register" th:action th:object="${user}" method="post">
+  <form action="/register" onsubmit="return valid()" th:action th:object="${user}" method="post">
 
     <div>
       <label for="id">회원ID</label>
       <input type="text" id="id" th:field="*{id}">
-      <button type="">아이디 중복체크</button>
+      <button type="button" onclick="sameCheck()">아이디 중복체크</button>
+<!--  여기에 버튼을 클릭하면 아이디가 중복인지 아닌지 글자띄어주고싶음.-->
     </div>
       <div>
           <label for="password">비밀번호</label>
@@ -40,4 +43,35 @@
       <button type="submit">회원가입</button>
   </form>
 </body>
+<script>
+    let submitCheck = false;
+
+    function valid() {
+        if (submitCheck) {
+            return true; //true일때 회원가입 버튼 동작
+        } else {
+            return false;
+        }
+
+    }
+    function sameCheck(){
+        let userId = document.getElementById('id').value.trim(); // input에서 사용자가 입력한 ID가져오기
+        console.log("USERID: "+userId);
+        if (!userId) {
+            return;//입력값이 공백인 경우 아무 작업도 수행하지 않음.
+        }
+        $.ajax({
+            type: "get",
+            url: "/register/idDuplicateCheck?id=" + userId
+        }).done((res) => {
+            submitCheck = true; //중복체크완료. 아이디가 중복되지 않음.
+
+            alert("사용가능한 아이디입니다.");
+        }).fail(()=>{
+            alert("메시지 중복입니다.");
+             submitCheck = false;
+        });
+
+    }
+</script>
 </html>
