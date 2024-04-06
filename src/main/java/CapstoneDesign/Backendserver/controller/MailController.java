@@ -8,20 +8,22 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
 
 @Controller
 @RequiredArgsConstructor
 @Slf4j
+@RequestMapping("/mail")
 public class MailController {
     private final MailService mailService;
 
-    @GetMapping("/")
+    @GetMapping
     public String MailPage() {
         return "Mail";
     }
 
-    @PostMapping("/mail")
-    public String MailSend(@ModelAttribute("MailVo") MailVo mailVo) {
+    @PostMapping()
+    public String MailSend(@ModelAttribute("mailVo") MailVo mailVo) {
         log.info("Method executed {}",mailVo.getReceiver());
         mailService.CreateMail(mailVo);
         return "Mail";
