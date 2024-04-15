@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
+import org.springframework.ui.Model;
 
 @Service
 @RequiredArgsConstructor
@@ -38,10 +39,13 @@ public class MailService {
 
     }
 
-    public void mailAuthorization(String userMail) {
+    public void sendingAuthenticationMail(String userMail, Model model) {
+        String randomNumber = String.valueOf(createRandomNumber());
+        model.addAttribute("randomNumber",randomNumber);
+
         //이메일중복 확인기능 넣어야한다.
         String text="홈페이지를 방문해주셔서 감사합니다."+
-                "\n"+ "인증번호는 "+createRandomNumber()+"입니다." +
+                "\n"+ "인증번호는 "+randomNumber+"입니다." +
                 "\n" +
                 "해당 인증번호를 인증번호 확인란에 기입해주세요.";
 

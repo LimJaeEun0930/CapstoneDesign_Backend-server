@@ -34,36 +34,5 @@ public class HomeController {
         return "login";
     }
 
-    @GetMapping("register")
-    public String register_get(@ModelAttribute("user") User user, Model model) {
-        log.info("회원가입창 입장");
-        return "register";
-    }
 
-    @PostMapping("register")
-    public String register_post(@Validated @ModelAttribute User user) {
-        log.info("{}", user.getName());
-        log.info("{}", user.getBirth());
-        userService.join(user);
-        return "login";
-    }
-
-    @GetMapping("register/idDuplicateCheck")
-    @ResponseBody
-    public ResponseEntity<String> register_idDuplicateCheck(@RequestParam String id) {
-        log.info("id중복확인 실행됨.");
-        boolean duplicated = userService.validateDuplicateMember(id);
-        log.info("duplicated:{}", duplicated);
-        if (duplicated) {
-            return new ResponseEntity<>("duplicated", HttpStatus.BAD_REQUEST);
-        } else return new ResponseEntity<>("ok", HttpStatus.OK);
-    }
-
-    @GetMapping("register/emailAuthorization")
-    @ResponseBody
-    public HttpStatus register_emailAuthorization(@RequestParam String email) {
-        log.info("이메일 인증 실행...{}", email);
-        mailService.mailAuthorization(email);
-        return HttpStatus.OK;
-    }
 }
