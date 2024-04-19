@@ -13,6 +13,7 @@ import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Locale;
@@ -29,6 +30,10 @@ public class HomeController {
     private final MailService mailService;
     private final RegisterValidator registerValidator;
 
+    @InitBinder
+    public void init(WebDataBinder dataBinder) {
+        dataBinder.addValidators(registerValidator);
+    }
 
 
     @GetMapping
@@ -44,7 +49,7 @@ public class HomeController {
     @PostMapping("login")
     public String doLogin(@Validated @ModelAttribute("userLogin") UserLogin userLogin, BindingResult bindingResult) {
         log.info("login시도");
-        registerValidator.validate(userLogin,bindingResult);
+        //registerValidator.validate(userLogin,bindingResult);
 
         if (bindingResult.hasErrors()) {
             log.info("errors={}", bindingResult);
