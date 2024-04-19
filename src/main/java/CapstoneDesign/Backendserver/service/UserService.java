@@ -21,10 +21,14 @@ public class UserService {
     @Transactional(readOnly = true)
     public boolean validateDuplicateMember(String id) {
         log.info("중복체크함수실행 id={}",id);
-        Optional<User> existinguser = Optional.ofNullable(userRepository.findById(id));
-        return existinguser.isPresent();
+        return userRepository.findById(id).isPresent();
         }
 
+    public Object findUser(String id){
+        if(userRepository.findById(id).isPresent()){
+        return userRepository.findById(id).get();
+    } else return "ID_NOT_FOUND";
+    }
 
     public void join(User user) {
         userRepository.save(user);

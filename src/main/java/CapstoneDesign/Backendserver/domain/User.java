@@ -5,6 +5,7 @@ import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
+import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
 
@@ -12,6 +13,7 @@ import java.time.LocalDate;
 @Getter
 @Setter
 @Entity
+@Component
 public class User {
 
     @NotBlank //implementation 'org.springframework.boot:spring-boot-starter-validation'임포트해야됨

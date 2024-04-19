@@ -6,6 +6,7 @@ import jakarta.persistence.PersistenceContext;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public class UserRepository {
@@ -18,9 +19,8 @@ public class UserRepository {
         em.persist(user);
     }
 
-    public User findById(String userId) {
-        User user = em.find(User.class, userId);//여기서 데이터 없을때 에러처리해야함.
-        return user;
+    public Optional<User> findById(String userId) {
+        return Optional.ofNullable(em.find(User.class, userId));
     }
 
     public List<User> findAll() {
