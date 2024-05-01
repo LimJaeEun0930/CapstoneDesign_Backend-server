@@ -10,27 +10,27 @@ import org.springframework.validation.Validator;
 
 @Component
 @RequiredArgsConstructor
-public class RegisterValidator implements Validator {
+public class LoginValidator implements Validator {
     private final UserService userService;
     @Override
     public boolean supports(Class<?> clazz) {
-        return false;
+        return UserLogin.class.isAssignableFrom(clazz);
     }
 
     @Override
     public void validate(Object target, Errors errors) {
 
         UserLogin userLogin = (UserLogin) target;
-        if(userService.findUser(userLogin.getId()).equals("ID_NOT_FOUND")){
+        Object findUser = userService.findUser(userLogin.getId());//이렇게 함으로써 query를 한번만 날릴 수 있다.
+        if(findUser.equals("ID_NOT_FOUND")){
             errors.rejectValue("id","required");
             return;
         }
         if(
-           !((User)userService.findUser(userLogin.getId())).getPassword().
+           !((User)findUser).getPassword().
                    equals(userLogin.getPw())){
             errors.rejectValue("pw","required");
         }
+
     }
-
-
 }
