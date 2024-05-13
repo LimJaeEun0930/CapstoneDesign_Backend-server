@@ -8,6 +8,9 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -24,12 +27,12 @@ public class BoardController {
     private final BoardService boardService;
 
     @GetMapping("/board/write")
-    public String writePage(@ModelAttribute("board") Board board, Model model, HttpServletRequest request) {
+    public String writeBoard_GET(@ModelAttribute("board") Board board, Model model, HttpServletRequest request) {
         HttpSession session = request.getSession(false);
+        User user = (User) session.getAttribute(SessionConst.LOGIN_USER);
 
-        if (session != null)
+        if (session != null && user != null)
         {
-            User user = (User) session.getAttribute(SessionConst.LOGIN_USER);
             log.info("user 들어옴?1{}", user.toString());
             model.addAttribute("user", user);
 //            model.addAttribute("board", board);이코드 없어도 @ModelAttribute에 담김.
@@ -43,7 +46,7 @@ public class BoardController {
     }
 
     @PostMapping("/board/write") //board의 필드들이 들어오지 않는 문제 있었는데,Board에 setter설정해주니 됨
-    public String save(@ModelAttribute Board board, HttpServletRequest request) {
+    public String writeBoard_POST(@ModelAttribute Board board, HttpServletRequest request) {
         HttpSession session = request.getSession(false);
         User user = (User) session.getAttribute(SessionConst.LOGIN_USER);
         log.info("user 들어옴?{}", user.toString());
@@ -51,30 +54,31 @@ public class BoardController {
         log.info("board = {}", board);
 
         boardService.save(board);
-        return "redirect:/boardList";
+        return "redirect:/board/paging";
     }
 
     @GetMapping("/board/edit/{board_id}") // PathVariable로 받아도 모델에 추가가 되는것 같다
-    public String boardEdit(@PathVariable Long board_id, Model model,HttpServletRequest request) {
+    public String boardEdit_GET(@PathVariable Long board_id,@RequestParam Long page ,Model model,HttpServletRequest request) {
         Board board = boardService.findById(board_id);
         HttpSession session = request.getSession(false);
         User user = (User) session.getAttribute(SessionConst.LOGIN_USER);
         model.addAttribute("user", user);
         model.addAttribute("boardUpdate", board);
+        model.addAttribute("page", page);
         return "board/boardEdit";
     }
 
     @PostMapping("/board/edit/{board_id}")
-    public String updateDetail(@PathVariable Long board_id, @ModelAttribute Board board) {
+    public String boardEdit_POST(@PathVariable Long board_id,@RequestParam Long page, @ModelAttribute Board board) {
         boardService.update(board,board_id);//error. dirty checking으로 메서드 하나 만들어야할듯
 
-        return "redirect:/board/" + board_id;
+        return "redirect:/board/" + board_id+"?page="+page;
     }
 
 
 
-    @GetMapping("/boardList")
-    public String boardList(Model model) {
+    //@GetMapping("/boardList")
+    public String boardList_GET(Model model) {
         List<Board> boardList = boardService.findAll();
         model.addAttribute("boardList", boardList);
 
@@ -82,8 +86,8 @@ public class BoardController {
     }
 
     @GetMapping("/board/{id}")
-    public String boardDetail(@PathVariable Long id, Model model,HttpServletRequest request) {
-        boardService.updateHits(id);
+    public String boardDetail_GET(@PathVariable Long id,@RequestParam Long page, Model model,HttpServletRequest request) {
+        boardService.updateHits(id); //조회수 증가
         Board board = boardService.findById(id);
 
         Optional<HttpSession> sessionOptional = Optional.ofNullable(request.getSession(false));
@@ -91,9 +95,11 @@ public class BoardController {
         {
             log.info("세션존재");
             HttpSession session = sessionOptional.get();
+            model.addAttribute("page", page);
 
-            if ((//로그인유저와 게시글의 유저가 같다면
-                    (User) session.getAttribute(SessionConst.LOGIN_USER)).getId()
+            if (//로그인유저와 게시글의 유저가 같다면
+                    (session.getAttribute(SessionConst.LOGIN_USER)!= null) &&
+                            ((User) session.getAttribute(SessionConst.LOGIN_USER)).getId()
                     .equals(board.getBoardWriter()))
             {
                 model.addAttribute("user", session.getAttribute(SessionConst.LOGIN_USER));
@@ -106,4 +112,26 @@ public class BoardController {
         return "board/boardDetail";
     }
 
+    @GetMapping("board/delete/{boardId}")
+    public String boardDelete_GET(@PathVariable Long boardId){
+        boardService.deleteBoard(boardId);
+
+        return "redirect:/board/paging";
+    }
+
+    @GetMapping("/board/paging")
+    public String paging(@PageableDefault(page = 1) Pageable pageable, Model model) {
+        pageable.getPageNumber();
+        Page<Board> boardList = boardService.paging(pageable);
+        int blockLimit = 3;
+        int startPage = (((int)(Math.ceil((double)pageable.getPageNumber() / blockLimit))) - 1) * blockLimit + 1; // 1 4 7 10 ~~
+        int endPage = ((startPage + blockLimit - 1) < boardList.getTotalPages()) ? startPage + blockLimit - 1 : boardList.getTotalPages();
+
+        model.addAttribute("boardList", boardList);
+        model.addAttribute("startPage", startPage);
+        model.addAttribute("endPage", endPage);
+        // page 갯수 20개
+        return "board/paging";
+    }
 }
+

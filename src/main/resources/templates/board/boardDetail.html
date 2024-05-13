@@ -21,14 +21,16 @@
                 <!-- user가 존재하는 경우에만 수정 버튼 렌더링 -->
                 <span th:if="${user}">
                     <span> | </span>
-                    <button th:onclick="|location.href='@{/board/edit/{boardId}(boardId=${board.getBoardId()})}'|"  type="button">
-                        수정
-                    </button>
+                    <button th:onclick="|location.href='@{/board/edit/{boardId}(boardId=${board.getBoardId()},page=${page})}'|"  type="button">
+                        수정</button>
+                    <button th:onclick="|location.href='@{/board/delete/{boardId}(boardId=${board.getBoardId()})}'|" type="button">글 삭제</button>
                 </span>
             </div>
             <div class="post-content" th:text="${board.getBoardContents()}">게시글 내용</div>
             <button th:onclick="|location.href='@{/}'|" type="button">home</button>
-        </div>
+            <button th:onclick="|location.href='@{/board/paging}'|" type="button">목록</button>
+
+
     </div>
 
 </body>

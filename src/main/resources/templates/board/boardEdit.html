@@ -8,7 +8,7 @@
 <body>
 
 
-<form th:action="@{/board/edit/{boardId}(boardId=${board_id})}" method="post" th:object="${boardUpdate}">
+<form th:action="@{/board/edit/{boardId}(boardId=${board_id},page=${page})}" method="post" th:object="${boardUpdate}">
   <input type="hidden" name="id" th:field="*{boardId}">
   writer: <input type="text" name="boardWriter" th:field="*{boardWriter}" readonly> <br>
   title: <input type="text" name="boardTitle" th:field="*{boardTitle}"> <br>
