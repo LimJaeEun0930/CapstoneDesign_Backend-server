@@ -7,15 +7,13 @@ import jakarta.persistence.Id;
 import jakarta.validation.constraints.NotBlank;
 import lombok.*;
 
-import java.time.LocalDateTime;
-
 @Getter
 @Setter
 @ToString
 @Entity
 @AllArgsConstructor
 @NoArgsConstructor
-public class Board extends BaseEntity{
+public class Board extends BoardTimeBaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long boardId;
