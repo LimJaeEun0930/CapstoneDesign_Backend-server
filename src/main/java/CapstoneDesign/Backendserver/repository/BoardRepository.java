@@ -26,12 +26,13 @@ public class BoardRepository {
     }
 
 
-
-    public List<Board> findAll() {
+    public List<Board> findAll()
+    {
         return em.createQuery("select b from Board b", Board.class).getResultList();
     }
 
-    public Page<Board> findAll(Pageable pageable) {
+    public Page<Board> findAll(Pageable pageable)
+    {
         int page = pageable.getPageNumber();
         int pageLimit = pageable.getPageSize();
         Sort sort = pageable.getSort();
@@ -43,6 +44,7 @@ public class BoardRepository {
 
         TypedQuery<Long> countQuery = em.createQuery(
                 "SELECT COUNT(b) FROM Board b", Long.class);
+
         long total = countQuery.getSingleResult();
 
         TypedQuery<Board> query = em.createQuery(
@@ -62,12 +64,14 @@ public class BoardRepository {
 //                .getResultList();
 //    }
 
-    public void updateHits(Long setid) {
+    public void updateHits(Long setid)
+    {
         em.createQuery("update Board b set b.boardHits =b.boardHits+1 where b.id= :setid")
                 .setParameter("setid", setid).executeUpdate();
     }
 
-    public Board findById(Long id) {
+    public Board findById(Long id)
+    {
 
         Optional<Board> optionalBoard = Optional.ofNullable(em.find(Board.class, id));
         if (optionalBoard.isPresent()) {
@@ -77,14 +81,16 @@ public class BoardRepository {
         }
     }
 
-    public void updateBoard(Board board, Long boardId) {
+    public void updateBoard(Board board, Long boardId)
+    {
         Board boardUpdate = em.find(Board.class, boardId);
         boardUpdate.setBoardTitle(board.getBoardTitle());
         boardUpdate.setBoardContents(board.getBoardContents());
 
     }
 
-    public void deleteBoard(Long boardId) {
+    public void deleteBoard(Long boardId)
+    {
         Board board = em.find(Board.class, boardId);
         em.remove(board);
     }

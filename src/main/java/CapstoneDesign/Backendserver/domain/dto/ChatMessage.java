@@ -1,15 +1,25 @@
 package CapstoneDesign.Backendserver.domain.dto;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Getter
 @Setter
+@NoArgsConstructor
+@AllArgsConstructor
 public class ChatMessage {
 
-    public enum MessageType{ENTER, TALK}
     private MessageType type;
-    private String roomId;
+    private String content;
     private String sender;
-    private String message;
+
+    public enum MessageType {
+        CHAT,
+        JOIN,
+        LEAVE
+    }
+
+
 }

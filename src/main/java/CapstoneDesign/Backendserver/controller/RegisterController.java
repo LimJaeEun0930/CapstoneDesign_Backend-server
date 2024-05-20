@@ -25,7 +25,8 @@ public class RegisterController {
 
 
     @PostMapping
-    public String register_post(@Validated @ModelAttribute User user, BindingResult bindingResult) {
+    public String register_post(@Validated @ModelAttribute User user, BindingResult bindingResult)
+    {
         log.info("{}", user.getName());
         log.info("{}", user.getBirth());
         if (bindingResult.hasErrors()) {
@@ -38,19 +39,23 @@ public class RegisterController {
 
     @GetMapping("idDuplicateCheck")
     @ResponseBody
-    public ResponseEntity<String> register_idDuplicateCheck(@RequestParam String id) {
+    public ResponseEntity<String> register_idDuplicateCheck(@RequestParam String id)
+    {
         log.info("id중복확인 실행됨.");
         boolean duplicated = userService.validateDuplicateMember(id);
         log.info("duplicated:{}", duplicated);
         if (duplicated) {
             return new ResponseEntity<>("duplicated", HttpStatus.BAD_REQUEST);
-        } else return new ResponseEntity<>("ok", HttpStatus.OK);
+        } else {
+            return new ResponseEntity<>("ok", HttpStatus.OK);
+        }
     }
 
     @GetMapping("sendingAuthenticationMail")
     @ResponseBody
     public ResponseEntity<String> register_sendingAuthenticationMail
-            (@RequestParam String email, Model model) {
+            (@RequestParam String email, Model model)
+    {
         log.info("이메일 인증 실행...{}", email);
         mailService.sendingAuthenticationMail(email, model);
 

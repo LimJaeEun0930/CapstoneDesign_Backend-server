@@ -15,12 +15,14 @@ public class MailController {
     private final MailService mailService;
 
     @GetMapping
-    public String MailPage() {
+    public String MailPage()
+    {
         return "Mail";
     }
 
     @PostMapping()
-    public String MailSend(@ModelAttribute("mailVo") MailVo mailVo) {
+    public String MailSend(@ModelAttribute("mailVo") MailVo mailVo)
+    {
         log.info("Method executed {}", mailVo.getReceiver());
         mailService.CreateMail(mailVo);
         return "Mail";

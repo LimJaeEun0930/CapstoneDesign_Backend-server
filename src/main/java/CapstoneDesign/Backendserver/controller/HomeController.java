@@ -43,7 +43,8 @@ public class HomeController {
 
 
     @GetMapping
-    public String mainPage(Model model,HttpServletRequest request) {
+    public String mainPage(Model model,HttpServletRequest request)
+    {
 
         HttpSession session = request.getSession(false);
         if (session == null) {
@@ -62,13 +63,15 @@ public class HomeController {
     }
 
     @GetMapping("login")
-    public String loginPage(@ModelAttribute("userLogin") UserLogin userLogin) {
+    public String loginPage(@ModelAttribute("userLogin") UserLogin userLogin)
+    {
         return "login";
     }
 
     @PostMapping("login")
     public String doLogin(@Validated @ModelAttribute("userLogin") UserLogin userLogin,
-                          BindingResult bindingResult, HttpServletRequest request) {
+                          BindingResult bindingResult, HttpServletRequest request)
+    {
         log.info("login시도");
 
         if (bindingResult.hasErrors()) {
@@ -90,7 +93,8 @@ public class HomeController {
     }
 
     @PostMapping("logout")
-    public String logout(HttpServletRequest request) {
+    public String logout(HttpServletRequest request)
+    {
 
         HttpSession session = request.getSession(false);
         if (session != null) {
@@ -99,7 +103,8 @@ public class HomeController {
         return "redirect:/";
     }
 
-    private void expireCookie(HttpServletResponse response, String cookieName) {
+    private void expireCookie(HttpServletResponse response, String cookieName)
+    {
         Cookie cookie = new Cookie(cookieName, null);
         cookie.setMaxAge(0);
         response.addCookie(cookie);
@@ -107,10 +112,15 @@ public class HomeController {
     }
 
     @GetMapping("register")
-    public String register_get(@ModelAttribute("user") User user, Model model) {
+    public String register_get(@ModelAttribute("user") User user, Model model)
+    {
 
         log.info("회원가입창 입장");
         return "register";
     }
 
+    @GetMapping("chat")
+    public String chat_get() {
+        return "chat";
+    }
 }

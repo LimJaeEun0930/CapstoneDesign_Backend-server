@@ -15,15 +15,18 @@ public class UserRepository {
 
     EntityManager em;
 
-    public void save(User user) {
+    public void save(User user)
+    {
         em.persist(user);
     }
 
-    public Optional<User> findById(String userId) {
+    public Optional<User> findById(String userId)
+    {
         return Optional.ofNullable(em.find(User.class, userId));
     }
 
-    public List<User> findAll() {
+    public List<User> findAll()
+    {
         return em.createQuery("select m from User m", User.class).getResultList();
     }
 
