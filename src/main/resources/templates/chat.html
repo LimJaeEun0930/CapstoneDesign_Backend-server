@@ -1,132 +1,137 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Chat Room</title>
-    <script src="https://cdn.jsdelivr.net/sockjs/1.1.1/sockjs.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/stomp/1.3.3/stomp.min.js"></script>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-        }
-        #chat-room {
-            width: 500px;
-            margin: 0 auto;
-            border: 1px solid #ccc;
-            padding: 10px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-        }
-        #messageArea {
-            height: 300px;
-            overflow-y: scroll;
-            border: 1px solid #ccc;
-            padding: 10px;
-            margin-bottom: 10px;
-        }
-        #messageArea p {
-            margin: 0;
-            padding: 5px;
-            border-bottom: 1px solid #eee;
-        }
-        #messageArea p:last-child {
-            border-bottom: none;
-        }
-        #messageForm {
-            display: flex;
-        }
-        #messageForm input[type="text"] {
-            flex: 1;
-            padding: 10px;
-            border: 1px solid #ccc;
-        }
-        #messageForm button {
-            padding: 10px;
-            border: none;
-            background: #007BFF;
-            color: white;
-            cursor: pointer;
-        }
-        #messageForm button:hover {
-            background: #0056b3;
-        }
-    </style>
-    <script>
-        var stompClient = null;
-        var username = null;
-
-        function connect(event) {
-            username = document.getElementById("username").value.trim();
-
-            if(username) {
-                var socket = new SockJS('/ws');
-                stompClient = Stomp.over(socket);
-                stompClient.connect({}, function (frame) {
-                    document.getElementById("login-page").classList.add("hidden");
-                    document.getElementById("chat-page").classList.remove("hidden");
-                    console.log('Connected: ' + frame);
-                    stompClient.subscribe('/topic/public', function (messageOutput) {
-                        showMessage(JSON.parse(messageOutput.body));
-                    });
-                    stompClient.send("/app/chat.addUser", {}, JSON.stringify({sender: username, type: 'JOIN'}));
-                });
-            }
-            event.preventDefault();
-        }
-
-        function sendMessage(event) {
-            var messageContent = document.getElementById("message").value.trim();
-
-            if(messageContent && stompClient) {
-                var chatMessage = {
-                    sender: username,
-                    content: messageContent,
-                    type: 'CHAT'
-                };
-                stompClient.send("/app/chat.sendMessage", {}, JSON.stringify(chatMessage));
-                document.getElementById("message").value = '';
-            }
-            event.preventDefault();
-        }
-
-        function showMessage(message) {
-            var messageArea = document.getElementById('messageArea');
-            var messageElement = document.createElement('p');
-
-            if(message.type === 'JOIN') {
-                messageElement.classList.add('event-message');
-                message.content = message.sender + ' joined!';
-            } else if(message.type === 'LEAVE') {
-                messageElement.classList.add('event-message');
-                message.content = message.sender + ' left!';
-            } else {
-                messageElement.classList.add('chat-message');
-                var usernameElement = document.createElement('strong');
-                usernameElement.appendChild(document.createTextNode(message.sender));
-                messageElement.appendChild(usernameElement);
-                messageElement.appendChild(document.createTextNode(': ' + message.content));
-            }
-
-            messageArea.appendChild(messageElement);
-            messageArea.scrollTop = messageArea.scrollHeight;
-        }
-    </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebSocket Chat</title>
+    <link rel="stylesheet" href="/static/css/styles.css">
 </head>
 <body>
-    <div id="login-page">
-        <h2>Enter Chat Room</h2>
-        <form onsubmit="connect(event)">
-            <input type="text" id="username" placeholder="Enter your username" required />
-            <button type="submit">Enter</button>
-        </form>
+
+<div class="top-bar">
+    <div>
+        <button onclick="goHome()">Home</button>
+        <button onclick="goToBoard()">Board</button>
     </div>
-    <div id="chat-page" class="hidden">
-        <div id="chat-room">
-            <h2>Chat Room</h2>
-            <div id="messageArea"></div>
-            <form id="messageForm" onsubmit="sendMessage(event)">
-                <input type="text" id="message" placeholder="Type a message..." required />
-                <button type="submit">Send</button>
-            </form>
+</div>
+
+<div class="container">
+    <div class="sidebar">
+        <button onclick="createRoom()">Create Room</button>
+        <div id="room-list">
+            <!-- 채팅방 목록이 여기에 추가됩니다. -->
         </div>
     </div>
+    <div class="chat-container">
+        <div id="chat-window" class="chat-window"></div>
+        <div class="message-input">
+            <input type="text" id="message-input" placeholder="Type a message...">
+            <button id="send-button">Send</button>
+        </div>
+    </div>
+</div>
+
+<script>
+
+    let socket;
+    let currentRoom = null;
+
+    document.addEventListener("DOMContentLoaded", function() {
+        connectToServer();
+        loadRooms();
+    });
+
+    function connectToServer() {
+        socket = new WebSocket('ws://localhost:8080/ws');
+        socket.onopen = function() {
+            console.log('Connected to server');
+        };
+        socket.onmessage = function(event) {
+            displayMessage(event.data);
+        };
+        socket.onclose = function() {
+            console.log('Disconnected from server');
+        };
+    }
+
+    function connectToRoom(room) {
+        if (currentRoom) {
+            socket.send(JSON.stringify({type: 'leave', room: currentRoom}));
+        }
+        currentRoom = room;
+        socket.send(JSON.stringify({type: 'join', room: room}));
+        document.getElementById('chat-window').innerHTML = '';
+    }
+
+    function displayMessage(message) {
+        const chatWindow = document.getElementById('chat-window');
+        const messageElement = document.createElement('div');
+        const parsedMessage = JSON.parse(message);
+        messageElement.textContent = parsedMessage.sender + ": " + parsedMessage.message;
+        chatWindow.appendChild(messageElement);
+        chatWindow.scrollTop = chatWindow.scrollHeight;
+    }
+
+    function createRoom() {
+        const roomName = prompt("Enter room name:");
+        if (roomName) {
+            const xhr = new XMLHttpRequest();
+            xhr.open("POST", "/chat/create", true);
+            xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState === 4 && xhr.status === 200) {
+                    loadRooms();
+                }
+            };
+            xhr.send("roomName=" + roomName);
+        }
+    }
+
+    function loadRooms() {
+        const xhr = new XMLHttpRequest();
+        xhr.open("GET", "/chat/rooms", true);
+        xhr.onreadystatechange = function () {
+            if (xhr.readyState === 4 && xhr.status === 200) {
+                const rooms = JSON.parse(xhr.responseText);
+                const roomList = document.getElementById('room-list');
+                roomList.innerHTML = '';
+                rooms.forEach(room => {
+                    const roomButton = document.createElement('button');
+                    roomButton.textContent = room.name;
+                    roomButton.onclick = function() {
+                        connectToRoom(room.id);
+                    };
+                    roomList.appendChild(roomButton);
+                });
+            }
+        };
+        xhr.send();
+    }
+
+    document.getElementById('send-button').addEventListener('click', function() {
+        const messageInput = document.getElementById('message-input');
+        const message = messageInput.value;
+        if (message && socket && socket.readyState === WebSocket.OPEN) {
+            socket.send(JSON.stringify({type: 'message', room: currentRoom, sender: 'User', message: message}));
+            messageInput.value = '';
+        }
+    });
+
+    document.getElementById('message-input').addEventListener('keypress', function(event) {
+        if (event.key === 'Enter') {
+            document.getElementById('send-button').click();
+        }
+    });
+
+    function goHome() {
+        window.location.href = '/home'; // 홈 페이지로 이동
+    }
+
+    function goToBoard() {
+        window.location.href = '/board'; // 게시판 페이지로 이동
+    }
+</script>
+
 </body>
 </html>
+

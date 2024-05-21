@@ -134,7 +134,7 @@ public class BoardController {
         model.addAttribute("boardList", boardList);
         model.addAttribute("startPage", startPage);
         model.addAttribute("endPage", endPage);
-        // page 갯수 20개
+
         return "board/paging";
     }
 }

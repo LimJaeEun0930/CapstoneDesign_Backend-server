@@ -119,8 +119,8 @@ public class HomeController {
         return "register";
     }
 
-    @GetMapping("chat")
-    public String chat_get() {
-        return "chat";
-    }
+//    @GetMapping("chat")
+//    public String chat_get() {
+//        return "chat";
+//    }
 }
